@@ -6,7 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 
 interface NovelRequestProps {
   userId: string;
@@ -32,16 +38,16 @@ const WEEKLY_LIMIT = 3;
 const BASE_TICKET_COST = 100;
 
 const SUPPORTED_DOMAINS = [
-  'fanqienovel.com',
-  'qimao.com',
-  'uuread.tw',
-  '69shuba.com',
-  'twkan.com',
-  'wenku8.net',
-  'lightnovel.us',
-  'boxnovel.com',
-  'readlightnovel.org',
-  'novelfull.com'
+  "fanqienovel.com",
+  "qimao.com",
+  "uuread.tw",
+  "69shuba.com",
+  "twkan.com",
+  "wenku8.net",
+  "lightnovel.us",
+  "boxnovel.com",
+  "readlightnovel.org",
+  "novelfull.com",
 ];
 
 export const NovelRequest = ({ userId }: NovelRequestProps) => {
@@ -51,7 +57,7 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
   const [quota, setQuota] = useState<UserQuota>({
     weekly_requests_used: 0,
     tickets: 0,
-    last_request_reset: new Date().toISOString()
+    last_request_reset: new Date().toISOString(),
   });
   const { toast } = useToast();
 
@@ -93,7 +99,9 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
   const validateUrl = (url: string) => {
     try {
       const urlObj = new URL(url);
-      return SUPPORTED_DOMAINS.some(domain => urlObj.hostname.includes(domain));
+      return SUPPORTED_DOMAINS.some((domain) =>
+        urlObj.hostname.includes(domain)
+      );
     } catch {
       return false;
     }
@@ -118,7 +126,8 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
     if (!validateUrl(url)) {
       toast({
         title: "Unsupported Domain",
-        description: "This domain is not supported. Please check the supported domains list.",
+        description:
+          "This domain is not supported. Please check the supported domains list.",
         variant: "destructive",
       });
       return;
@@ -137,15 +146,16 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
     setLoading(true);
     try {
       // Create the request
-      const { error: requestError } = await supabase
-        .from("requests")
-        .insert({
-          user_id: userId,
-          url: url.trim(),
-          ticket_cost: ticketCost,
-        });
+      const { error: requestError } = await supabase.from("requests").insert({
+        user_id: userId,
+        url: url.trim(),
+        ticket_cost: ticketCost,
+      });
 
       if (requestError) throw requestError;
+
+      // 🔁 Trigger backend ingestion
+      await fetch("/api/process");
 
       // Update user quota and tickets
       const { error: updateError } = await supabase
@@ -161,12 +171,14 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
       // Award XP for making a request
       await supabase.rpc("award_xp", {
         _user_id: userId,
-        _xp_amount: 10
+        _xp_amount: 10,
       });
 
       toast({
         title: "Request Submitted",
-        description: `Your novel request has been submitted${ticketCost > 0 ? ` for ${ticketCost} tickets` : ''}.`,
+        description: `Your novel request has been submitted${
+          ticketCost > 0 ? ` for ${ticketCost} tickets` : ""
+        }.`,
       });
 
       setUrl("");
@@ -186,15 +198,15 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "pending":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       case "approved":
-        return <CheckCircle className="h-4 w-4 text-blue-600" />;
+        return <AlertCircle className="h-5 w-5 text-blue-500" />;
       case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "rejected":
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <XCircle className="h-5 w-5 text-red-500" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />;
+        return <FileText className="h-5 w-5 text-gray-400" />;
     }
   };
 
@@ -235,7 +247,10 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
                 {quotaUsed} / {WEEKLY_LIMIT} used
               </span>
             </div>
-            <Progress value={(quotaUsed / WEEKLY_LIMIT) * 100} className="h-2 mb-2" />
+            <Progress
+              value={(quotaUsed / WEEKLY_LIMIT) * 100}
+              className="h-2 mb-2"
+            />
             <p className="text-xs text-muted-foreground">
               Resets every Sunday. Additional requests cost tickets.
             </p>
@@ -262,7 +277,9 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
               onChange={(e) => setUrl(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Supported domains: {SUPPORTED_DOMAINS.slice(0, 3).join(", ")} and {SUPPORTED_DOMAINS.length - 3} more
+              Supported domains:{" "}
+              {SUPPORTED_DOMAINS.slice(0, 3).join(", ")} and{" "}
+              {SUPPORTED_DOMAINS.length - 3} more
             </p>
           </div>
 
@@ -271,7 +288,11 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
             disabled={loading || !url.trim()}
             className="w-full bg-gradient-primary"
           >
-            {loading ? "Submitting..." : `Submit Request${ticketCost > 0 ? ` (${ticketCost} tickets)` : ""}`}
+            {loading
+              ? "Submitting..."
+              : `Submit Request${
+                  ticketCost > 0 ? ` (${ticketCost} tickets)` : ""
+                }`}
           </Button>
         </CardContent>
       </Card>
@@ -293,9 +314,7 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
                   key={request.id}
                   className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg"
                 >
-                  <div className="mt-1">
-                    {getStatusIcon(request.status)}
-                  </div>
+                  <div className="mt-1">{getStatusIcon(request.status)}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge className={getStatusColor(request.status)}>
@@ -307,13 +326,19 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm font-medium truncate">{request.title || "Processing..."}</p>
-                    <p className="text-xs text-muted-foreground truncate">{request.url}</p>
+                    <p className="text-sm font-medium truncate">
+                      {request.title || "Processing..."}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {request.url}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(request.created_at).toLocaleDateString()}
                     </p>
                     {request.notes && (
-                      <p className="text-xs text-muted-foreground mt-1">{request.notes}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {request.notes}
+                      </p>
                     )}
                   </div>
                 </div>
