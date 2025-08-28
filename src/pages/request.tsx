@@ -9,15 +9,15 @@ const RequestPage = () => {
   const navigate = useNavigate();
 
   const extractSlugFromUrl = (url: string): string => {
-    const match = url.match(/book\\/(\\d+)/);
+    const match = url.match(/book\/(\d+)/);
     return match ? match[1] : "unknown";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!url.includes("twkan.com")) {
-      toast.error("Only twkan.com URLs are supported for now.");
+    if (!url.match(/^https?:\/\/(www\.)?twkan\.com\/book\/\d+\.html$/)) {
+      toast.error("Please enter a valid twkan.com book URL.");
       return;
     }
 
@@ -48,6 +48,7 @@ const RequestPage = () => {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste twkan.com URL here"
           className="w-full px-4 py-2 border rounded"
+          required
         />
         <button
           type="submit"
