@@ -12,7 +12,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RequestPage from "./pages/request";
 import ReadPage from "./pages/read/[slug]";
-import ConsolePage from "./pages/console"; // ✅ Added Console page import
+import ConsolePage from "./pages/console"; // ✅ Add this import
 
 const queryClient = new QueryClient();
 
@@ -35,7 +35,7 @@ const App = () => (
             <Route path="/profile/*" element={<Profile />} />
             <Route path="/request" element={<RequestPage />} />
             <Route path="/read/:slug" element={<ReadPage />} />
-            <Route path="/console" element={<ConsolePage />} /> {/* ✅ Console route added */}
+            <Route path="/console" element={<ConsolePage />} /> {/* ✅ Add this route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
