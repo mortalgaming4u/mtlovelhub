@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig(({ mode }) => ({
+  base: "./", // Ensures relative asset paths for Vercel
   server: {
     host: "::",
     port: 8080,
@@ -16,11 +17,14 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom"], // ✅ Add this line
+    dedupe: ["react", "react-dom"],
   },
   build: {
+    outDir: "dist", // Explicitly define output folder for Vercel
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
