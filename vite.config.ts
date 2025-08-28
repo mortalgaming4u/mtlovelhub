@@ -18,9 +18,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["react", "react-dom"], // ✅ Add this line
   },
   build: {
-    chunkSizeWarningLimit: 1000, // Optional: suppress warning
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
