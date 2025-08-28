@@ -23,6 +23,9 @@ const RequestPage = () => {
     } else {
       toast.success("Request submitted successfully!");
       setUrl("");
+      // 🔽 Add this block to redirect to reader page
+    const slug = extractSlugFromUrl(url); // You’ll define this function below
+    navigate(`/read/${slug}`);
     }
   };
 
