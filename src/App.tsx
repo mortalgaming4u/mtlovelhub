@@ -1,4 +1,4 @@
-import React from "react"; // ✅ Required for JSX
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -10,7 +10,7 @@ import Ranking from "./pages/Ranking";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import RequestPage from "./pages/request"; // ✅ NEW IMPORT
+import RequestPage from "./pages/request";
 
 const queryClient = new QueryClient();
 
@@ -31,9 +31,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/*" element={<Profile />} />
-            {/* ✅ NEW ROUTE */}
             <Route path="/request" element={<RequestPage />} />
-            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
