@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useParams } from "react-router-dom"; // ✅ Correct for Vite + React
 import { getBookmark, setBookmark } from "@/lib/bookmark";
 
 const ReadPage = () => {
-  const router = useRouter();
-  const { slug } = router.query;
-
+  const { slug } = useParams(); // ✅ Get slug from URL
   const [chapters, setChapters] = useState<string[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!slug || typeof slug !== "string") return;
+    if (!slug) return;
 
     const fetchChapters = async () => {
       try {
         const res = await fetch(`/api/extract?slug=${slug}`);
         if (!res.ok) throw new Error("Failed to fetch chapters");
+
         const data = await res.json();
         setChapters(data.chapters || []);
 
@@ -38,7 +37,7 @@ const ReadPage = () => {
 
   const handleSelectChapter = (index: number) => {
     setSelectedChapter(index);
-    if (slug && typeof slug === "string") {
+    if (slug) {
       setBookmark(slug, index);
     }
   };
@@ -54,7 +53,6 @@ const ReadPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">📖 Reading: Book {slug}</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ul className="border rounded p-4 space-y-2 overflow-y-auto max-h-[80vh]">
           {chapters.map((_, index) => (
@@ -69,7 +67,6 @@ const ReadPage = () => {
             </li>
           ))}
         </ul>
-
         <div className="md:col-span-2 border rounded p-4 overflow-y-auto max-h-[80vh]">
           {selectedChapter !== null ? (
             <>
