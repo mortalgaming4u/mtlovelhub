@@ -1,21 +1,30 @@
-// src/pages/request.tsx
 import { useState } from "react";
-import { supabase } from "@/lib/supabase"; // adjust path if needed
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 const RequestPage = () => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const extractSlugFromUrl = (url: string): string => {
+    const match = url.match(/book\\/(\\d+)/);
+    return match ? match[1] : "unknown";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!url.includes("twkan.com")) {
       toast.error("Only twkan.com URLs are supported for now.");
       return;
     }
 
     setLoading(true);
+
     const { error } = await supabase.from("requests").insert([{ url }]);
+
     setLoading(false);
 
     if (error) {
@@ -23,16 +32,16 @@ const RequestPage = () => {
     } else {
       toast.success("Request submitted successfully!");
       setUrl("");
-      // 🔽 Add this block to redirect to reader page
-    const slug = extractSlugFromUrl(url); // You’ll define this function below
-    navigate(`/read/${slug}`);
+
+      const slug = extractSlugFromUrl(url);
+      navigate(`/read/${slug}`);
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <h1 className="text-2xl font-bold mb-4">📚 Novel Request Form</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <input
           type="text"
           value={url}
@@ -47,6 +56,9 @@ const RequestPage = () => {
         >
           {loading ? "Submitting..." : "Submit Request"}
         </button>
+        {loading && (
+          <p className="text-sm text-muted-foreground">Processing request...</p>
+        )}
       </form>
     </div>
   );
