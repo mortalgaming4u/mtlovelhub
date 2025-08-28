@@ -54,6 +54,7 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState<Request[]>([]);
+  const [preview, setPreview] = useState<{ title: string; cover_url?: string } | null>(null);
   const [quota, setQuota] = useState<UserQuota>({
     weekly_requests_used: 0,
     tickets: 0,
@@ -65,6 +66,30 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
     fetchRequests();
     fetchUserQuota();
   }, [userId]);
+
+  // 🔁 Poll requests every 5s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRequests();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
+  // 🔎 Metadata preview (debounced)
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (!validateUrl(url)) return setPreview(null);
+      try {
+        const res = await fetch(`/api/preview?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        setPreview(data);
+      } catch {
+        setPreview(null);
+      }
+    };
+    const debounce = setTimeout(fetchPreview, 800);
+    return () => clearTimeout(debounce);
+  }, [url]);
 
   const fetchUserQuota = async () => {
     try {
@@ -145,10 +170,11 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
 
     setLoading(true);
     try {
-      // Create the request
+      // Create the request with title preview
       const { error: requestError } = await supabase.from("requests").insert({
         user_id: userId,
         url: url.trim(),
+        title: preview?.title || null,
         ticket_cost: ticketCost,
       });
 
@@ -168,7 +194,7 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
 
       if (updateError) throw updateError;
 
-      // Award XP for making a request
+      // Award XP
       await supabase.rpc("award_xp", {
         _user_id: userId,
         _xp_amount: 10,
@@ -182,6 +208,7 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
       });
 
       setUrl("");
+      setPreview(null);
       fetchRequests();
       fetchUserQuota();
     } catch (error: any) {
@@ -282,6 +309,25 @@ export const NovelRequest = ({ userId }: NovelRequestProps) => {
               {SUPPORTED_DOMAINS.length - 3} more
             </p>
           </div>
+
+          {/* Metadata Preview */}
+          {preview && (
+            <div className="bg-muted/30 p-4 rounded-lg flex gap-4 items-center">
+              {preview.cover_url && (
+                <img
+                  src={preview.cover_url}
+                  alt="Cover"
+                  className="w-16 h-24 object-cover rounded"
+                />
+              )}
+              <div>
+                <p className="font-medium">{preview.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  Preview before submitting
+                </p>
+              </div>
+            </div>
+          )}
 
           <Button
             onClick={submitRequest}
