@@ -1,10 +1,13 @@
-import NovelRequest from '@/components/NovelRequest';
+// src/pages/Request.tsx
+import React from 'react';
 
-export default function RequestPage() {
+const RequestPage = () => {
   return (
-    <main className="p-4 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Submit a Novel Request</h1>
-      <NovelRequest />
-    </main>
+    <div className="p-6">
+      <h1 className="text-xl font-bold">Novel Request Form</h1>
+      {/* Your form logic goes here */}
+    </div>
   );
-}
+};
+
+export default RequestPage;
