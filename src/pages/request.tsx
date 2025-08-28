@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface RequestLog {
   url: string;
@@ -22,7 +21,7 @@ const RequestPage = () => {
     const timestamp = `[${new Date().toLocaleTimeString()}] ${msg}`;
     setDebugLogs((prev) => {
       const updated = [...prev, timestamp];
-      return updated.slice(-100); // keep last 100
+      return updated.slice(-100);
     });
 
     requestAnimationFrame(() => {
@@ -135,34 +134,28 @@ const RequestPage = () => {
         {consoleOpen ? "Close Console" : "Open Console"}
       </button>
 
-      {/* Slide-up Debug Console */}
-      <AnimatePresence>
-        {consoleOpen && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            className="fixed bottom-0 left-0 right-0 h-1/2 bg-black text-green-400 font-mono text-xs overflow-auto border-t border-gray-700 z-40"
-            ref={logsRef}
-          >
-            <div className="sticky top-0 bg-black text-white font-bold p-2 flex justify-between items-center">
-              <span>🛠 Debug Console</span>
-              <button
-                onClick={() => setDebugLogs([])}
-                className="text-xs bg-red-600 px-2 py-1 rounded"
-              >
-                Clear
-              </button>
-            </div>
-            <ul className="space-y-1 px-2">
-              {debugLogs.map((log, i) => (
-                <li key={i}>{log}</li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Static Debug Console */}
+      {consoleOpen && (
+        <div
+          className="fixed bottom-0 left-0 right-0 h-1/2 bg-black text-green-400 font-mono text-xs overflow-auto border-t border-gray-700 z-40"
+          ref={logsRef}
+        >
+          <div className="sticky top-0 bg-black text-white font-bold p-2 flex justify-between items-center">
+            <span>🛠 Debug Console</span>
+            <button
+              onClick={() => setDebugLogs([])}
+              className="text-xs bg-red-600 px-2 py-1 rounded"
+            >
+              Clear
+            </button>
+          </div>
+          <ul className="space-y-1 px-2">
+            {debugLogs.map((log, i) => (
+              <li key={i}>{log}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
