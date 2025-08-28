@@ -1,5 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { Book, Search, Trophy, Shuffle, Star, User, Menu } from "lucide-react";
+import {
+  Book,
+  Search,
+  Trophy,
+  Shuffle,
+  Star,
+  User,
+  Menu,
+  Terminal, // ✅ Added icon for Console
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -13,6 +22,7 @@ const Header = () => {
     { name: "Ranking", href: "/ranking/daily", icon: Trophy },
     { name: "Random", href: "/random", icon: Shuffle },
     { name: "Recommendations", href: "/recommendations", icon: Star },
+    { name: "Console", href: "/console", icon: Terminal }, // ✅ Console link added
   ];
 
   const isActive = (path: string) => {
@@ -45,7 +55,10 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-smooth">
+          <Link
+            to="/"
+            className="flex items-center gap-3 hover:opacity-80 transition-smooth"
+          >
             <div className="flex items-center justify-center w-10 h-10 bg-gradient-hero rounded-xl shadow-elegant">
               <Book className="h-5 w-5 text-white" />
             </div>
@@ -53,7 +66,9 @@ const Header = () => {
               <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                 NovelHub
               </h1>
-              <p className="text-xs text-muted-foreground">MTL Translation Platform</p>
+              <p className="text-xs text-muted-foreground">
+                MTL Translation Platform
+              </p>
             </div>
           </Link>
 
@@ -66,8 +81,7 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
               <Link to="/profile">
-                <User className="h-4 w-4" />
-                Profile
+                <User className="h-4 w-4" /> Profile
               </Link>
             </Button>
 
@@ -88,7 +102,9 @@ const Header = () => {
                       <h2 className="font-bold bg-gradient-primary bg-clip-text text-transparent">
                         NovelHub
                       </h2>
-                      <p className="text-xs text-muted-foreground">MTL Translation</p>
+                      <p className="text-xs text-muted-foreground">
+                        MTL Translation
+                      </p>
                     </div>
                   </div>
                   <nav className="flex flex-col gap-2">
