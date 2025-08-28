@@ -1,17 +1,24 @@
 import * as cheerio from 'cheerio';
-import { fetchHtml } from '../utils/fetchHtml';
+import { fetchHtml } from '@/lib/utils';
 
-export async function extractTwkan(url: string) {
-  const html = await fetchHtml(url);
+export async function extractTwkan(bookUrl: string) {
+  const html = await fetchHtml(bookUrl);
   const $ = cheerio.load(html);
 
-  const title = $('h1.title').text().trim();
-  const chapters = [];
+  const title = $('h1').first().text().trim();
+  const author = $('span:contains("作者")').next().text().trim() || 'Unknown';
 
-  $('ul.chapter-list li a').each((i, el) => {
-    const chapterUrl = $(el).attr('href');
-    const chapterTitle = $(el).text().trim();
-    chapters.push({ title: chapterTitle, url: chapterUrl });
+  const chapters: { title: string; url: string; content?: string }[] = [];
+
+  $('ul.chapter-list li a').each((_, el) => {
+    const href = $(el).attr('href');
+    const text = $(el).text().trim();
+    if (href && text) {
+      chapters.push({
+        title: text,
+        url: href.startsWith('http') ? href : `https://twkan.com${href}`,
+      });
+    }
   });
 
   for (const chap of chapters) {
@@ -20,5 +27,5 @@ export async function extractTwkan(url: string) {
     chap.content = $$('.chapter-content').text().trim();
   }
 
-  return { title, chapters };
+  return { title, author, chapters };
 }
