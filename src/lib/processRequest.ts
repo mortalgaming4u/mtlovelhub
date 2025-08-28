@@ -1,26 +1,29 @@
 import { createClient } from "@supabase/supabase-js";
-import { twkanExtractor } from "../extractors/twkan";
 
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_KEY!
+);
 
-async function processRequests() {
-  const { data: requests } = await supabase
-    .from("requests")
-    .select("*")
-    .eq("status", "pending");
-
-  for (const req of requests || []) {
-    try {
-      await supabase.from("requests").update({ status: "processing" }).eq("id", req.id);
-
-      const result = await twkanExtractor(req.url); // your logic
-
-      await supabase.from("novels").insert(result); // or chapters
-      await supabase.from("requests").update({ status: "done" }).eq("id", req.id);
-    } catch (err) {
-      await supabase.from("requests").update({ status: "error" }).eq("id", req.id);
-    }
+/**
+ * Fetches chapters for a given slug from the Supabase `novels` table.
+ * Used by /api/extract endpoint to serve chapters to the reader page.
+ */
+export async function processRequest(slug: string) {
+  if (!slug) {
+    throw new Error("Missing slug");
   }
-}
 
-processRequests();
+  const { data, error } = await supabase
+    .from("novels")
+    .select("chapters")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !data) {
+    console.error("Supabase fetch error:", error);
+    throw new Error("Chapters not found");
+  }
+
+  return { chapters: data.chapters };
+}
