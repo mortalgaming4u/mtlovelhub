@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 
 export default function RequestPage() {
-  const [slug, setSlug] = useState("");
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -13,19 +13,20 @@ export default function RequestPage() {
     try {
       const res = await fetch("/api/request", {
         method: "POST",
-        body: JSON.stringify({ slug }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
       });
 
       const data = await res.json();
-      if (data.success) {
-        router.push(`/read/${encodeURIComponent(slug)}`);
+
+      if (res.ok && data.success && data.slug) {
+        router.push(`/read/${encodeURIComponent(data.slug)}`);
       } else {
-        alert("Failed to ingest book");
+        alert(data.error || "Failed to ingest book.");
       }
     } catch (err) {
       console.error("Request error:", err);
-      alert("Error processing request");
+      alert("Error processing request.");
     } finally {
       setLoading(false);
     }
@@ -37,9 +38,9 @@ export default function RequestPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="Enter book URL (e.g. https://ixdzs.tw/...)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Enter book URL (e.g. https://twkan.com/book/76943.html)"
           className="w-full px-3 py-2 border rounded"
           required
         />
