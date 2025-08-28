@@ -11,7 +11,8 @@ import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RequestPage from "./pages/request";
-import ReadPage from "./pages/read/[slug]"; // ✅ Import your dynamic reader page
+import ReadPage from "./pages/read/[slug]";
+import ConsolePage from "./pages/console"; // ✅ Added Console page import
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,8 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/*" element={<Profile />} />
             <Route path="/request" element={<RequestPage />} />
-            <Route path="/read/:slug" element={<ReadPage />} /> {/* ✅ Added route */}
+            <Route path="/read/:slug" element={<ReadPage />} />
+            <Route path="/console" element={<ConsolePage />} /> {/* ✅ Console route added */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
