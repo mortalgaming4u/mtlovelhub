@@ -1,13 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface RequestLog {
+  url: string;
+  created_at: string;
+}
 
 const RequestPage = () => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<RequestLog[]>([]);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const logsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [consoleOpen, setConsoleOpen] = useState(false);
+
+  const log = (msg: string) => {
+    const timestamp = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    setDebugLogs((prev) => {
+      const updated = [...prev, timestamp];
+      return updated.slice(-100); // keep last 100
+    });
+
+    requestAnimationFrame(() => {
+      if (logsRef.current) {
+        logsRef.current.scrollTop = logsRef.current.scrollHeight;
+      }
+    });
+  };
 
   const extractSlugFromUrl = (url: string): string => {
     const match = url.match(/book\/(\d+)/);
@@ -15,37 +38,48 @@ const RequestPage = () => {
   };
 
   const fetchLogs = async () => {
+    log("Fetching recent requests from Supabase...");
     const { data, error } = await supabase
       .from("requests")
       .select("url, created_at")
       .order("created_at", { ascending: false })
       .limit(10);
 
-    if (!error && data) setLogs(data);
+    if (!error && data) {
+      setLogs(data as RequestLog[]);
+      log("Fetched " + data.length + " recent requests.");
+    } else {
+      log("Error fetching logs: " + (error?.message || "unknown"));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    log("Form submitted");
 
-    if (!url.match(/^https?:\/\/(www\.)?twkan\.com\/book\/\d+\.html$/)) {
+    if (!url.match(/^https?:\/\/(www\.)?twkan\.com\/book\/\d+(\.html)?/)) {
+      log("Invalid URL format");
       toast.error("Please enter a valid twkan.com book URL.");
       return;
     }
 
     setLoading(true);
+    log("Sending to Supabase...");
 
     const { error } = await supabase.from("requests").insert([{ url }]);
 
     setLoading(false);
 
     if (error) {
-      toast.error("Failed to submit request.");
+      log("Supabase error: " + error.message);
+      toast.error("Failed to submit request: " + error.message);
     } else {
-      toast.success("Request submitted successfully!");
+      log("Request submitted successfully");
       setUrl("");
-      fetchLogs(); // Refresh logs after submission
+      fetchLogs();
 
       const slug = extractSlugFromUrl(url);
+      log("Extracted slug: " + slug);
       navigate(`/read/${slug}`);
     }
   };
@@ -92,6 +126,43 @@ const RequestPage = () => {
           ))}
         </ul>
       </div>
+
+      {/* Floating toggle button */}
+      <button
+        onClick={() => setConsoleOpen(!consoleOpen)}
+        className="fixed bottom-4 right-4 bg-black text-white px-3 py-2 rounded-full shadow-lg z-50"
+      >
+        {consoleOpen ? "Close Console" : "Open Console"}
+      </button>
+
+      {/* Slide-up Debug Console */}
+      <AnimatePresence>
+        {consoleOpen && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            className="fixed bottom-0 left-0 right-0 h-1/2 bg-black text-green-400 font-mono text-xs overflow-auto border-t border-gray-700 z-40"
+            ref={logsRef}
+          >
+            <div className="sticky top-0 bg-black text-white font-bold p-2 flex justify-between items-center">
+              <span>🛠 Debug Console</span>
+              <button
+                onClick={() => setDebugLogs([])}
+                className="text-xs bg-red-600 px-2 py-1 rounded"
+              >
+                Clear
+              </button>
+            </div>
+            <ul className="space-y-1 px-2">
+              {debugLogs.map((log, i) => (
+                <li key={i}>{log}</li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
