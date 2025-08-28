@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -6,11 +6,22 @@ import { toast } from "sonner";
 const RequestPage = () => {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logs, setLogs] = useState([]);
   const navigate = useNavigate();
 
   const extractSlugFromUrl = (url: string): string => {
     const match = url.match(/book\/(\d+)/);
     return match ? match[1] : "unknown";
+  };
+
+  const fetchLogs = async () => {
+    const { data, error } = await supabase
+      .from("requests")
+      .select("url, created_at")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (!error && data) setLogs(data);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,11 +43,16 @@ const RequestPage = () => {
     } else {
       toast.success("Request submitted successfully!");
       setUrl("");
+      fetchLogs(); // Refresh logs after submission
 
       const slug = extractSlugFromUrl(url);
       navigate(`/read/${slug}`);
     }
   };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -61,6 +77,21 @@ const RequestPage = () => {
           <p className="text-sm text-muted-foreground">Processing request...</p>
         )}
       </form>
+
+      {/* Logs Box */}
+      <div className="mt-8 w-full max-w-md p-4 border rounded bg-gray-50">
+        <h2 className="text-lg font-semibold mb-2">📜 Recent Requests</h2>
+        <ul className="text-sm space-y-1">
+          {logs.map((log, i) => (
+            <li key={i}>
+              <span className="font-mono">{log.url}</span> —{" "}
+              <span className="text-gray-500">
+                {new Date(log.created_at).toLocaleString()}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
