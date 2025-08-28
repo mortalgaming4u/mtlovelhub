@@ -11,6 +11,7 @@ import Ranking from "./pages/Ranking";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import RequestPage from "./pages/request"; // ✅ NEW IMPORT
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,8 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/*" element={<Profile />} />
+              {/* ✅ NEW ROUTE */}
+              <Route path="/request" element={<RequestPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
