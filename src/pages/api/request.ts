@@ -1,6 +1,7 @@
 // pages/api/request.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { processRequest } from "@/lib/processRequest";
+import { supabase } from "@/lib/supabase"; // ✅ Supabase client
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { slug } = JSON.parse(req.body);
@@ -11,7 +12,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const result = await processRequest(slug);
-    // Optional: write to Supabase or cache
+
+    // ✅ Log submitted slug to Supabase
+    const { error } = await supabase.from("books").insert({ slug });
+    if (error) console.error("Supabase insert error:", error);
+
     res.status(200).json({ success: true, chapters: result.chapters });
   } catch (error) {
     console.error("Ingestion error:", error);
