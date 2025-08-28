@@ -1,29 +1,29 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { processRequest } from "@/lib/processRequest";
-import { supabase } from "@/lib/supabase"; // Supabase client
+import type { NextApiRequest, NextApiResponse } from "next"
+import { processRequest } from "@/lib/processRequest"
+import { supabase } from "@/lib/supabase"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    const { slug } = JSON.parse(req.body);
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" })
 
-    if (!slug || typeof slug !== "string") {
-      return res.status(400).json({ error: "Missing or invalid slug" });
+  try {
+    const { url } = JSON.parse(req.body)
+    if (!url || typeof url !== "string" || !url.includes("twkan.com")) {
+      return res.status(400).json({ error: "Missing or invalid URL" })
     }
 
     // Run extraction logic
-    const result = await processRequest(slug);
+    const { slug, book, chapters } = await processRequest(url)
 
-    // Log to Supabase
-    const { error } = await supabase.from("books").insert({ slug });
-    if (error) {
-      console.error("Supabase insert error:", error);
-      // Optional: return 202 if you want to proceed even if logging fails
-    }
+    // Insert book metadata
+    const { error: bookError } = await supabase.from("books").upsert([book])
+    if (bookError) console.error("Book insert error:", bookError)
 
-    // Return extracted chapters
-    res.status(200).json({ success: true, chapters: result.chapters });
+    // Insert chapters
+    const { error: chapterError } = await supabase.from("chapters").upsert(chapters)
+    if (chapterError) console.error("Chapter insert error:", chapterError)
+
+    // Return slug for frontend redirect
+    res.status(200).json({ success: true, slug })
   } catch (error) {
-    console.error("Ingestion error:", error);
-    res.status(500).json({ error: "Failed to ingest book" });
-  }
-}
+    console.error("Ingestion error:", error)
+    res.status(500).json({ error: "Failed to ingest book"
