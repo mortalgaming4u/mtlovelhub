@@ -1,4 +1,3 @@
-// src/pages/api/scrape.ts
 import { scrapeBook } from '@/lib/extractors';
 import { supabase } from '@/lib/supabase/client';
 
@@ -14,11 +13,17 @@ export default async function handler(req, res) {
     try {
       const book = await scrapeBook(request.url);
 
-      const { data: novel } = await supabase
+      const { data: novel, error: novelError } = await supabase
         .from('novels')
-        .insert({ title: book.title, source_url: request.url })
+        .insert({
+          title: book.title,
+          author: book.author,
+          source_url: request.url,
+        })
         .select()
         .single();
+
+      if (novelError) throw new Error(novelError.message);
 
       const chapters = book.chapters.map((chap, i) => ({
         novel_id: novel.id,
@@ -27,7 +32,11 @@ export default async function handler(req, res) {
         content: chap.content,
       }));
 
-      await supabase.from('chapters').insert(chapters);
+      const { error: chapterError } = await supabase
+        .from('chapters')
+        .insert(chapters);
+
+      if (chapterError) throw new Error(chapterError.message);
 
       await supabase
         .from('requests')
