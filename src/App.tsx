@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RequestPage from "./pages/request";
+import ReadPage from "./pages/read/[slug]"; // ✅ Import your dynamic reader page
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/*" element={<Profile />} />
             <Route path="/request" element={<RequestPage />} />
+            <Route path="/read/:slug" element={<ReadPage />} /> {/* ✅ Added route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
