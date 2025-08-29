@@ -7,9 +7,13 @@ import NovelCard from "@/components/NovelCard";
 import { getMostViewedNovels, getRecentNovels, getTopRatedNovels } from "@/data/mockNovels";
 
 const Home = () => {
+  console.log("Home component rendering...");
+  
   const mostViewed = getMostViewedNovels(4);
   const recentNovels = getRecentNovels(4);
   const topRated = getTopRatedNovels(4);
+
+  console.log("Home data loaded:", { mostViewed: mostViewed?.length, recentNovels: recentNovels?.length, topRated: topRated?.length });
 
   return (
     <div className="min-h-screen bg-gradient-subtle">

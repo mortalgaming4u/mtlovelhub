@@ -16,32 +16,38 @@ import ConsolePage from "./pages/console"; // ✅ Add this import
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/novel-list" element={<NovelList />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/ranking/:type" element={<Ranking />} />
-            <Route path="/ranking" element={<Ranking />} />
-            <Route path="/random" element={<Home />} />
-            <Route path="/recommendations" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/*" element={<Profile />} />
-            <Route path="/request" element={<RequestPage />} />
-            <Route path="/read/:slug" element={<ReadPage />} />
-            <Route path="/console" element={<ConsolePage />} /> {/* ✅ Add this route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+console.log("App.tsx loading...");
+
+const App = () => {
+  console.log("App component rendering...");
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/novel-list" element={<NovelList />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/ranking/:type" element={<Ranking />} />
+              <Route path="/ranking" element={<Ranking />} />
+              <Route path="/random" element={<Home />} />
+              <Route path="/recommendations" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/*" element={<Profile />} />
+              <Route path="/request" element={<RequestPage />} />
+              <Route path="/read/:slug" element={<ReadPage />} />
+              <Route path="/console" element={<ConsolePage />} /> {/* ✅ Add this route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
