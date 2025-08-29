@@ -10,14 +10,13 @@ export default async function handler(req, res) {
   try {
     console.log("🚀 Starting extraction for:", url);
 
-    const { title, toc } = await extractBook(url);
-
-    console.log("✅ Title:", title);
-    console.log("📚 Chapters:", toc.length);
+    const result = await extractBook(url);
+    console.log("✅ Title:", result.title);
+    console.log("📚 Chapters:", result.toc?.length || 0);
 
     const bookData = {
-      title,
-      chapters: toc.map((c, i) => ({
+      title: result.title || "Unknown Title",
+      chapters: (result.toc || []).map((c: any, i: number) => ({
         title: c.title,
         content: c.content,
         order: i + 1

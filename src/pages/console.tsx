@@ -1,8 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const ConsolePage = () => {
   const [logs, setLogs] = useState<string[]>([]);
+  interface RequestEntry {
+    url: string;
+    created_at: string;
+  }
   const logsRef = useRef<HTMLDivElement>(null);
 
   const log = (msg: string) => {
@@ -27,10 +31,10 @@ const ConsolePage = () => {
     if (error) {
       log("❌ Error: " + error.message);
     } else {
-      data.forEach((entry) => {
+      (data as RequestEntry[])?.forEach((entry) => {
         log(`📚 ${entry.url} — ${new Date(entry.created_at).toLocaleString()}`);
       });
-      log(`✅ Fetched ${data.length} entries.`);
+      log(`✅ Fetched ${data?.length || 0} entries.`);
     }
   };
 

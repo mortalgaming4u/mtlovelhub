@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface RequestLog {
@@ -65,7 +65,7 @@ const RequestPage = () => {
     setLoading(true);
     log("Sending to Supabase...");
 
-    const { error } = await supabase.from("requests").insert([{ url }]);
+    const { error } = await supabase.from("requests").insert([{ url, user_id: null }]);
 
     setLoading(false);
 

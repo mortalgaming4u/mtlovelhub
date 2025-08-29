@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { fetchHtml } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 type Chapter = {
   title: string;
@@ -119,25 +119,39 @@ async function fetchChapterContent(chapter: Chapter): Promise<string> {
 }
 
 // 🧾 Insert book and chapters into Supabase with error handling
-async function ingestToSupabase(book: Book, chapters: Chapter[]) {
+async function ingestToSupabase(book: Book, chapters: Chapter[], bookUrl: string) {
   try {
     const { error: bookError } = await supabase
-      .from('books')
-      .upsert(book);
+      .from('novels')
+      .upsert({
+        title: book.title,
+        author: book.author,
+        original_url: bookUrl,
+        source_domain: 'twkan.com'
+      });
     
     if (bookError) {
       console.error('Error inserting book:', bookError);
       throw bookError;
     }
     
+    const { data: novelData } = await supabase
+      .from('novels')
+      .select('id')
+      .eq('title', book.title)
+      .single();
+
+    if (!novelData) {
+      throw new Error('Failed to create novel record');
+    }
+
     const chaptersData = chapters.map((chap, index) => ({
-      book_id: book.id,
+      novel_id: novelData.id,
+      chapter_number: index + 1,
       title: chap.title,
-      url: chap.url,
       content: chap.content,
-      order: index + 1,
     }));
-    
+
     const { error: chaptersError } = await supabase
       .from('chapters')
       .upsert(chaptersData);
@@ -192,7 +206,7 @@ export async function extractTwkan(bookUrl: string): Promise<ExtractionResult> {
     }
     
     // Store in database
-    await ingestToSupabase(book, chapters);
+    await ingestToSupabase(book, chapters, bookUrl);
     
     const stats = {
       totalChapters: chapters.length,
